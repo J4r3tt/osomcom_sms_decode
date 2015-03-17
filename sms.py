@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+# base on wireshark gsmtap decode
 from struct import *
 
 
@@ -17,7 +17,7 @@ def bcdDigits(chars):
 
 class GSMTAP:
     # gsmtap http://bb.osmocom.org/trac/attachment/wiki/GSMTAP/gsmtap.h
-    # base on wireshark gsmtap decode
+    
 
     def __init__(self, gsmtap):
         self.gsmtap = gsmtap
@@ -64,7 +64,6 @@ class DTAP:
 
     def __init__(self, dtap):
         self.dtap= dtap
-
         self.protocol_discriminator = ord(dtap[0:1]) & 0xF
         print self.protocol_discriminator
         self.dtap_sms_type = ord(dtap[1])
