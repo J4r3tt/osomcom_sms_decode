@@ -65,30 +65,26 @@ class DTAP:
     def __init__(self, dtap):
         self.dtap= dtap
         self.protocol_discriminator = ord(dtap[0:1]) & 0xF
-        print self.protocol_discriminator
         self.dtap_sms_type = ord(dtap[1])
-        print self.dtap_sms_type
         self.cp_lenth=ord(dtap[2])
-        print self.cp_lenth
         self.next_data=dtap[3:]
 
 class RP:
 
     def __init__(self, rp):
         self.rp = rp
-
         self.RP_message_type=ord(rp[0])
         self.RP_origin_len = ord(rp[2])
         self.RP_origin_ext = ord(rp[3])
         self.RP_origin = bcdDigits(rp[4:3 + self.RP_origin_len])
-        # self.RP_dest_start = 3+ self.RP_origin_len
-        # self.RP_dest_len = ord(payload[self.RP_dest_start])
-        # self.RP_dest_over = self.RP_dest_start + self.RP_dest_len + 1
-        # self.length = ord(payload[self.RP_dest_over])
-        # self.tpdu_off = self.RP_dest_over + 1
-        # self.next_data=self.payload[self.tpdu_off:self.tpdu_off+self.length]
+        self.RP_dest_start = 3+ self.RP_origin_len
+        self.RP_dest_len = ord(rp[self.RP_dest_start])
+        self.RP_dest_over = self.RP_dest_start + self.RP_dest_len + 1
+        self.length = ord(rp[self.RP_dest_over])
+        self.tpdu_off = self.RP_dest_over + 1
+        self.next_data=self.rp[self.tpdu_off:self.tpdu_off+self.length]
     # def get_tpdu(self):
-        # return self.payload[self.tpdu_off:self.tpdu_off+self.length]
+    #     return self.rp[self.tpdu_off:self.tpdu_off+self.length]
 
 
 class TPDU:

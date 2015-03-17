@@ -6,7 +6,6 @@ import sys
 import threading
 import Queue
 import time
-import hexdump
 import subprocess
 from sms import *
 
@@ -30,9 +29,9 @@ def handle_message(**kargs):
 
                     #hexdump.hexdump(lapdm.next_data)
                         rp=RP(dtap.next_data)
-                        print ord(data[20:21])& 0x0F
+                        tpdu=TPDU(rp.next_data)
                 #print rp.RP_origin
-                # print("[SMS from %s] %s" % (tpdu.TP_origin, tpdu.get_data()))     
+                print("[SMS from %s] %s" % (tpdu.TP_origin, tpdu.get_data()))     
                 # print("LINK[%d] ARFCN=%d TIME_SLOT=%d CHANNEL=%d, N(R)=%d N(S)=%d, segment more[%d], payload len=%d\n" %
                 #   (gsmtap.link, gsmtap.arfcn, gsmtap.time_slot, gsmtap.channel_type, lapdm.n_r, lapdm.n_s, lapdm.last_segment, lapdm.length))
 
