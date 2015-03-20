@@ -93,20 +93,31 @@ class TPDU:
 
     def __init__(self, tpdu):
         self.TP_udhi = (ord(tpdu[0]) >> 6) & 0x01
-        self.TP_mti = ord(tpdu[0]) & 0x03
         self.TP_mms = (ord(tpdu[0]) >> 2) & 0x01
-        self.TP_origin_num = ord(tpdu[1])
-        self.TP_origin_len = (
-            self.TP_origin_num >> 1) + (self.TP_origin_num % 2)
-        self.TP_origin_ext = ord(tpdu[2])
-        self.TP_origin = bcdDigits(tpdu[3:3 + self.TP_origin_len])
-        self.data_start = 3 + self.TP_origin_len + 9
-        self.tpu_len = ord(tpdu[self.data_start])
-        print self.TP_udhi
-        if self.TP_udhi == 0:
-            self.data = tpdu[
-                self.data_start + 1:self.data_start + 1 + self.tpu_len]
-        else:
-            self.userdata_len = ord(tpdu[self.data_start+1])
-            self.data = tpdu[
-                self.data_start + 2 + self.userdata_len:self.data_start + 2 + self.userdata_len + self.tpu_len]
+        self.TP_mti = ord(tpdu[0]) & 0x03
+        # SMS-DELIVER or SMS-SUBMIT
+        if (self.TP_mti == 0) or (self.TP_mti == 1):
+            self.TP_origin_num = ord(tpdu[1])
+            self.TP_origin_len = (
+                self.TP_origin_num >> 1) + (self.TP_origin_num % 2)
+            self.TP_origin_ext = ord(tpdu[2])
+            self.TP_origin = bcdDigits(tpdu[3:3 + self.TP_origin_len])
+            self.TP_charaterset = ord(
+                tpdu[3 + self.TP_origin_len + 1]) >> 2 & 0x03
+            self.data_start = 3 + self.TP_origin_len + 9
+            self.tpu_len = ord(tpdu[self.data_start])
+            if self.TP_udhi == 0:
+                self.data = tpdu[
+                    self.data_start + 1:self.data_start + 1 + self.tpu_len]
+            else:
+                self.userdata_len = ord(tpdu[self.data_start + 1])
+                self.data = tpdu[
+                    self.data_start + 2 + self.userdata_len:self.data_start + 2 + self.userdata_len + self.tpu_len]
+        # SMS-STATUS REPORT
+        elif self.TP_mti == 2:
+            self.TP_origin_num = ord(tpdu[2])
+            self.TP_origin_len = (
+                self.TP_origin_num >> 1) + (self.TP_origin_num % 2)
+            self.TP_origin_ext = ord(tpdu[3])
+            self.TP_origin = bcdDigits(tpdu[4:4 + self.TP_origin_len])
+            self.status_result = ord(tpdu[4 + self.TP_origin_len + 14:]) & 0x7f
