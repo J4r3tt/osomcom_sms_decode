@@ -8,7 +8,7 @@ import Queue
 import time
 import subprocess
 from sms import *
-
+import hexdump
 
 def handle_message(**kargs):
     sms_segments = ""
@@ -40,30 +40,37 @@ def handle_message(**kargs):
                             if tpdu.TP_mti == 0x00:
                                 # it's sms
                                 if tpdu.TP_charaterset == 2:
-                                    print("[SMS from %s] %s" % (
-                                        tpdu.TP_origin, tpdu.data.decode("utf-16be").encode("utf-8")))
+                                    try:
+                                        print("[SMS from %s] %s" % (
+                                            tpdu.TP_origin, tpdu.data.decode("utf-16be").encode("utf-8")))
+                                    except:
+                                        hexdump.hexdump(tpdu.data)
                                 # it's mmse
                                 elif tpdu.TP_charaterset == 1:
                                     print("[MMSE from %s] " % (tpdu.TP_origin))
                             # SMS-STATUS REPORT
                             if tpdu.TP_mti == 0x02:
-                                if tpdu.status_result == 0:
-                                    print(
-                                        "[Downlink ]SMS status report from %s] Short message transaction completed, Short message received by the SME" % tpdu.TP_origin)
-                                elif tpdu.status_result == 4:
-                                    print(
-                                        "[Downlink ]SMS status report from %s] Short message transaction completed, Reserved" % tpdu.TP_origin)
-                                elif tpdu.status_result == 1:
-                                    print(
-                                        "[Downlink ]SMS status report from %s] Short message transaction completed, Short message forwarded by the SC to the SME but the SC is unable to confirm delivery" % tpdu.TP_origin)
+                                print ("[Downlink ]SMS status report from %s] " % tpdu.TP_origin)
+                                # if tpdu.status_result == 0:
+                                #     print(
+                                #         "[Downlink ]SMS status report from %s] Short message transaction completed, Short message received by the SME" % tpdu.TP_origin)
+                                # elif tpdu.status_result == 4:
+                                #     print(
+                                #         "[Downlink ]SMS status report from %s] Short message transaction completed, Reserved" % tpdu.TP_origin)
+                                # elif tpdu.status_result == 1:
+                                #     print(
+                                #         "[Downlink ]SMS status report from %s] Short message transaction completed, Short message forwarded by the SC to the SME but the SC is unable to confirm delivery" % tpdu.TP_origin)
                         # Message Type RP-DATA (MS to Network)
                         elif rp.RP_message_type == 0:
                             tpdu = TPDU(rp.next_data)
                             # SMS-SUBMIT
                             if tpdu.TP_mti == 0x01:
                                 if tpdu.TP_charaterset == 2:
-                                    print("[SMS from %s] %s" % (
-                                        tpdu.TP_origin, tpdu.data.decode("utf-16be").encode("utf-8")))
+                                    try:
+                                        print("[SMS from %s] %s" % (
+                                            tpdu.TP_origin, tpdu.data.decode("utf-16be").encode("utf-8")))
+                                    except:
+                                        hexdump.hexdump(tpdu.data)
                                 else:
                                     print("MMSE uplink")
                         # RP-ACK
