@@ -8,7 +8,7 @@ import Queue
 import time
 import subprocess
 from sms import *
-import hexdump
+
 
 def handle_message(**kargs):
     sms_segments = ""
@@ -44,13 +44,15 @@ def handle_message(**kargs):
                                         print("[SMS from %s] %s" % (
                                             tpdu.TP_origin, tpdu.data.decode("utf-16be").encode("utf-8")))
                                     except:
-                                        hexdump.hexdump(tpdu.data)
+                                        print(
+                                            "Decode Failed!Maybe wrong format")
                                 # it's mmse
                                 elif tpdu.TP_charaterset == 1:
                                     print("[MMSE from %s] " % (tpdu.TP_origin))
                             # SMS-STATUS REPORT
                             if tpdu.TP_mti == 0x02:
-                                print ("[Downlink ]SMS status report from %s] " % tpdu.TP_origin)
+                                print(
+                                    "[Downlink ]SMS status report from %s] " % tpdu.TP_origin)
                                 # if tpdu.status_result == 0:
                                 #     print(
                                 #         "[Downlink ]SMS status report from %s] Short message transaction completed, Short message received by the SME" % tpdu.TP_origin)
@@ -70,7 +72,8 @@ def handle_message(**kargs):
                                         print("[SMS from %s] %s" % (
                                             tpdu.TP_origin, tpdu.data.decode("utf-16be").encode("utf-8")))
                                     except:
-                                        hexdump.hexdump(tpdu.data)
+                                        print(
+                                            "Decode Failed!Maybe wrong format")
                                 else:
                                     print("MMSE uplink")
                         # RP-ACK
