@@ -16,6 +16,7 @@ def bcdDigits(chars):
     return "".join([str(v) for v in result])
 
 
+
 class GSMTAP:
     # gsmtap http://bb.osmocom.org/trac/attachment/wiki/GSMTAP/gsmtap.h
 
@@ -89,8 +90,8 @@ class RP:
             self.RP_dest_len = ord(rp[3])
             self.RP_dest_ext = ord(rp[4])
             self.RP_dest = bcdDigits(rp[5:4 + self.RP_dest_len])
-            self.lenth = ord(rp[4 + self.RP_dest_len + 1])
-            self.next_data = self.rp[4 + self.RP_dest_len + 2:]
+            self.lenth = ord(rp[4 + self.RP_dest_len])
+            self.next_data = self.rp[4 + self.RP_dest_len + 1:]
        # Message Type RP-ACK (MS to Network)
         elif self.RP_message_type == 0x02:
             self.lenth = ord(rp[3])
@@ -124,6 +125,7 @@ class TPDU:
                 self.userdata_len = ord(tpdu[self.data_start + 1])
                 self.data = tpdu[
                     self.data_start + 2 + self.userdata_len:self.data_start + 1 + self.tpu_len]
+                    
         # SMS-SUBMIT
         elif self.TP_mti == 1:
             self.TP_vpf=(ord(tpdu[0]) >> 3) & 0x03
