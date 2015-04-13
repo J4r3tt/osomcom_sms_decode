@@ -16,7 +16,6 @@ def bcdDigits(chars):
     return "".join([str(v) for v in result])
 
 
-
 class GSMTAP:
     # gsmtap http://bb.osmocom.org/trac/attachment/wiki/GSMTAP/gsmtap.h
 
@@ -36,10 +35,6 @@ class GSMTAP:
         self.antenna_number = ord(gsmtap[13])
         self.sub_slot = ord(gsmtap[14])
         self.next_data = self.gsmtap[self.hdr_len:]
-
-    # def get_payload(self):
-        # return self.gsmtap[self.hdr_len:]
-        # return self.gsmtap[self.hdr_len:]
 
 
 class LAPDm:
@@ -117,7 +112,7 @@ class TPDU:
                 tpdu[3 + self.TP_origin_len + 2:3 + self.TP_origin_len + 8])
             self.data_start = 3 + self.TP_origin_len + 9
             self.tpu_len = ord(tpdu[self.data_start])
-            #deal with long sms
+            # If long SMS
             if self.TP_udhi == 0:
                 self.data = tpdu[
                     self.data_start + 1:self.data_start + 1 + self.tpu_len]
@@ -125,10 +120,10 @@ class TPDU:
                 self.userdata_len = ord(tpdu[self.data_start + 1])
                 self.data = tpdu[
                     self.data_start + 2 + self.userdata_len:self.data_start + 1 + self.tpu_len]
-                    
+
         # SMS-SUBMIT
         elif self.TP_mti == 1:
-            self.TP_vpf=(ord(tpdu[0]) >> 3) & 0x03
+            self.TP_vpf = (ord(tpdu[0]) >> 3) & 0x03
             self.TP_dest_num = ord(tpdu[2])
             self.TP_dest_len = (
                 self.TP_dest_num >> 1) + (self.TP_dest_num % 2)
@@ -136,13 +131,13 @@ class TPDU:
             self.TP_dest = bcdDigits(tpdu[4:4 + self.TP_dest_len])
             self.TP_charaterset = ord(
                 tpdu[4 + self.TP_dest_len + 1]) >> 2 & 0x03
-            #if contain TP-Validity-Period header
-            if self.TP_vpf==2:
+            # if contain TP-Validity-Period header
+            if self.TP_vpf == 2:
                 self.data_start = 4 + self.TP_dest_len + 3
             else:
                 self.data_start = 4 + self.TP_dest_len + 2
             self.tpu_len = ord(tpdu[self.data_start])
-            #deal with long sms
+            # deal with long sms
             if self.TP_udhi == 0:
                 self.data = tpdu[
                     self.data_start + 1:self.data_start + 1 + self.tpu_len]
