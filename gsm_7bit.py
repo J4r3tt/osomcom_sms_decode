@@ -98,6 +98,3 @@ def gsm_decode(codedtext):
             bitcount = 0
             number = 0
     return output
-
-
-print gsm_encode("401")

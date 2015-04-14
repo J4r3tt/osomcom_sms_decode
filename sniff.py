@@ -6,19 +6,11 @@ import os
 import sys
 import threading
 import Queue
-import time
 import subprocess
 import gsm_7bit
 import hexdump
 from sms import *
 
-
-def get_sms_time(time_stamp):
-    try:
-        center_time = time.strptime(time_stamp, "%y%m%d%H%M%S")
-    except:
-        center_time = time.localtime()
-    return time.strftime("%Y-%m-%d %H:%M:%S", center_time)
 
 
 def handle_message(**kargs):
@@ -49,35 +41,13 @@ def handle_message(**kargs):
                             print "-" * 90
                             # SMS-DELIVER
                             if tpdu.TP_mti == 0x00:
-                                # Character set: UCS2 (16 bit)
-                                if tpdu.TP_charaterset == 2:
-                                    center_time = get_sms_time(tpdu.time_stamp)
-                                    try:
-                                        print("%s (Downlink) [SMS from %s] %s" % (
-                                            center_time, tpdu.TP_origin, tpdu.data.decode("utf-16be").encode("utf-8")))
-                                    except:
-                                        hexdump.hexdump(tpdu.data)
-
-                                # Character set:GSM 7 bit default alphabet
-                                elif tpdu.TP_charaterset == 0:
-                                    center_time = get_sms_time(tpdu.time_stamp)
-                                    try:
-                                        print("%s (Downlink) [SMS from %s] %s" % (
-                                            center_time, tpdu.TP_origin, gsm_7bit.gsm_decode(tpdu.data).encode("utf-8")))
-                                    except:
-                                        hexdump.hexdump(tpdu.data)
-
-                                # Character set: 8 bit data
-                                elif tpdu.TP_charaterset == 1:
-                                    center_time = get_sms_time(tpdu.time_stamp)
-                                    print(
-                                        "%s (Downlink) [MMSE from %s] " % (center_time, tpdu.TP_origin))
+                                print("%s (Downlink) [ From %s] %s" % (
+                                            tpdu.get_sms_time(), tpdu.TP_origin, tpdu.get_sms_text()))
 
                             # SMS-STATUS REPORT
                             if tpdu.TP_mti == 0x02:
-                                center_time = get_sms_time(tpdu.time_stamp)
                                 print(
-                                    "%s (Downlink) [SMS status report from %s] " % (center_time, tpdu.TP_origin))
+                                    "%s (Downlink) [ From %s] SMS status report " % (tpdu.get_sms_time(), tpdu.TP_origin))
                                 # if tpdu.status_result == 0:
                                 #     print(
                                 #         "[Downlink ]SMS status report from %s] Short message transaction completed, Short message received by the SME" % tpdu.TP_origin)
@@ -99,36 +69,15 @@ def handle_message(**kargs):
                             center_time = time.localtime()
                             # SMS-SUBMIT
                             if tpdu.TP_mti == 0x01:
-                                # Character set: UCS2 (16 bit)
-                                if tpdu.TP_charaterset == 2:
-                                    center_time = get_sms_time(
-                                        time.localtime())
-                                    try:
-                                        print("%s (Uplink)[SMS to %s] %s" % (
-                                            center_time, tpdu.TP_dest, tpdu.data.decode("utf-16be").encode("utf-8")))
-                                    except:
-                                        hexdump.hexdump(rp.next_data)
-                                        hexdump.hexdump(tpdu.data)
-
-                                # Character set:GSM 7 bit default alphabet
-                                elif tpdu.TP_charaterset == 0:
-                                    center_time = get_sms_time(tpdu.time_stamp)
-                                    print("%s (Uplink)[SMS to %s] %s" % (
-                                        center_time, tpdu.TP_dest, gsm_7bit.gsm_decode(tpdu.data).encode("utf-8")))
-                                    
-                                # Character set: 8 bit data
-                                elif tpdu.TP_charaterset == 1:
-                                    center_time = get_sms_time(tpdu.time_stamp)
-                                    print("%s (Uplink)[ MMSE ]" %
-                                          center_time)
+                                print("%s (Uplink) [ From %s] %s" % (
+                                            tpdu.get_sms_time(), tpdu.TP_origin, tpdu.get_sms_text()))
 
                         # RP-ACK
                         elif rp.RP_message_type == 2:
                             # SMS-DELIVER REPORT
                             print "-" * 90
-                            center_time = get_sms_time(tpdu.time_stamp)
                             print("%s (Uplink) SMS status report" %
-                                  center_time)
+                                  tpdu.get_sms_time())
 
                 # print("LINK[%d] ARFCN=%d TIME_SLOT=%d CHANNEL=%d, N(R)=%d N(S)=%d, segment more[%d], payload len=%d\n" %
                 #   (gsmtap.link, gsmtap.arfcn, gsmtap.time_slot, gsmtap.channel_type, lapdm.n_r, lapdm.n_s, lapdm.last_segment, lapdm.length))
