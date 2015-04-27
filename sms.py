@@ -160,30 +160,34 @@ class TPDU:
             self.status_result = ord(tpdu[4 + self.TP_origin_len + 6]) & 0x7f
 
     def get_sms_text(self):
-        # Character set:GSM 7 bit default alphabet
-        if self.TP_charaterset == 0:
-            # It's not a long SMS
-            if self.TP_udhi == 0:
-                return gsm_7bit.gsm_decode(self.data.encode('hex')).encode("utf-8")
-            # Long 7 bit SMS which contain fill bits
-            else:
-                firt_bit_text = gsm_7bit.gsm_decode(
-                    (self.data[0] >> 1).encode('hex')).encode("utf-8")
-                other_text = gsm_7bit.gsm_decode(
-                    self.data[1:].encode('hex')).encode("utf-8")
-                return firt_bit_text + other_text
+        try:
+            # Character set:GSM 7 bit default alphabet
+            if self.TP_charaterset == 0:
+                # It's not a long SMS
+                if self.TP_udhi == 0:
+                    return gsm_7bit.gsm_decode(self.data.encode('hex')).encode("utf-8")
+                # Long 7 bit SMS which contain fill bits
+                else:
+                    firt_bit_text = gsm_7bit.gsm_decode(
+                        (ord(self.data[0]) >> 1).encode('hex')).encode("utf-8")
+                    other_text = gsm_7bit.gsm_decode(
+                        self.data[1:].encode('hex')).encode("utf-8")
+                    return firt_bit_text + other_text
 
         # Character set: 8 bit data
-        elif self.TP_charaterset == 1:
-            return "MMSE Message"
+            elif self.TP_charaterset == 1:
+                return "MMSE Message"
 
         # Character set: UCS2 (16 bit)
-        elif self.TP_charaterset == 2:
-            return self.data.decode("utf-16be").encode("utf-8")
+            elif self.TP_charaterset == 2:
+                return self.data.decode("utf-16be").encode("utf-8")
+        except:
+            return "Decode Fail"
 
     def get_sms_time(self):
         try:
             center_time = time.strptime(self.time_stamp, "%y%m%d%H%M%S")
+        # If time is not set
         except:
             center_time = time.localtime()
         return time.strftime("%Y-%m-%d %H:%M:%S", center_time)

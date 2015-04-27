@@ -1,5 +1,4 @@
 # -*- coding: utf8 -*-
-#!/usr/bin/python
 
 import socket
 import os
@@ -7,8 +6,6 @@ import sys
 import threading
 import Queue
 import subprocess
-import gsm_7bit
-import hexdump
 from sms import *
 
 
@@ -48,29 +45,16 @@ def handle_message(**kargs):
                             if tpdu.TP_mti == 0x02:
                                 print(
                                     "%s (Downlink) [ From %s] SMS status report " % (tpdu.get_sms_time(), tpdu.TP_origin))
-                                # if tpdu.status_result == 0:
-                                #     print(
-                                #         "[Downlink ]SMS status report from %s] Short message transaction completed, Short message received by the SME" % tpdu.TP_origin)
-                                # elif tpdu.status_result == 4:
-                                #     print(
-                                #         "[Downlink ]SMS status report from %s] Short message transaction completed, Reserved" % tpdu.TP_origin)
-                                # elif tpdu.status_result == 1:
-                                #     print(
-                                #         "[Downlink ]SMS status report from %s] Short message transaction completed, Short message forwarded by the SC to the SME but the SC is unable to confirm delivery" % tpdu.TP_origin)
                         
                         # Message Type RP-DATA (MS to Network)
                         elif rp.RP_message_type == 0:
-                            try:
-                                tpdu = TPDU(rp.next_data)
-                            except:
-                                hexdump.hexdump(dtap.next_data)
-                                hexdump.hexdump(rp.next_data)
+                            tpdu = TPDU(rp.next_data)
                             print "-" * 90
                             center_time = time.localtime()
                             # SMS-SUBMIT
                             if tpdu.TP_mti == 0x01:
                                 print("%s (Uplink) [ From %s] %s" % (
-                                            tpdu.get_sms_time(), tpdu.TP_origin, tpdu.get_sms_text()))
+                                            tpdu.get_sms_time(), tpdu.TP_dest, tpdu.get_sms_text()))
 
                         # RP-ACK
                         elif rp.RP_message_type == 2:
@@ -79,8 +63,6 @@ def handle_message(**kargs):
                             print("%s (Uplink) SMS status report" %
                                   tpdu.get_sms_time())
 
-                # print("LINK[%d] ARFCN=%d TIME_SLOT=%d CHANNEL=%d, N(R)=%d N(S)=%d, segment more[%d], payload len=%d\n" %
-                #   (gsmtap.link, gsmtap.arfcn, gsmtap.time_slot, gsmtap.channel_type, lapdm.n_r, lapdm.n_s, lapdm.last_segment, lapdm.length))
 
 if __name__ == '__main__':
     print "Start listen port 4729..."
