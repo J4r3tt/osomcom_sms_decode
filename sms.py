@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # base on wireshark gsmtap decode
+
 import time
 import gsm_7bit
 from struct import *
@@ -165,11 +166,12 @@ class TPDU:
             if self.TP_charaterset == 0:
                 # It's not a long SMS
                 if self.TP_udhi == 0:
+                    print "normal"
                     return gsm_7bit.gsm_decode(self.data.encode('hex')).encode("utf-8")
                 # Long 7 bit SMS which contain fill bits
                 else:
                     firt_bit_text = gsm_7bit.gsm_decode(
-                        (ord(self.data[0]) >> 1).encode('hex')).encode("utf-8")
+                        (chr(ord(self.data[0]) >> 1).encode("hex"))).encode("utf-8")
                     other_text = gsm_7bit.gsm_decode(
                         self.data[1:].encode('hex')).encode("utf-8")
                     return firt_bit_text + other_text
